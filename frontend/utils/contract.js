@@ -29,8 +29,9 @@ const CONTRACT_ABI = [
  */
 export function getContractAddress() {
   const address = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
-  if (!address) {
-    throw new Error('Endereço do contrato não configurado! Configure NEXT_PUBLIC_CONTRACT_ADDRESS no .env.local');
+  if (!address || address === '') {
+    console.warn('⚠️ Endereço do contrato não configurado. Crie o arquivo .env.local');
+    return null;
   }
   return address;
 }
@@ -40,11 +41,15 @@ export function getContractAddress() {
  * @returns {ethers.Contract}
  */
 export function getContract() {
+  const address = getContractAddress();
+  if (!address) {
+    throw new Error('Contrato não configurado');
+  }
   const provider = getProvider();
   if (!provider) {
     throw new Error('Provider não disponível');
   }
-  return new ethers.Contract(getContractAddress(), CONTRACT_ABI, provider);
+  return new ethers.Contract(address, CONTRACT_ABI, provider);
 }
 
 /**

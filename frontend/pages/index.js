@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import StatsCard from '../components/StatsCard';
-import { getTotalSupply, getMaxSupply, getBalance, getTokenInfo, isPaused } from '../utils/contract';
+import AddTokenButton from '../components/AddTokenButton';
+import NetworkSwitcher from '../components/NetworkSwitcher';
+import { getTotalSupply, getMaxSupply, getBalance, getTokenInfo, isPaused, getContractAddress } from '../utils/contract';
 import { getConnectedAddress } from '../utils/web3';
 import { formatNumber } from '../utils/format';
 import toast from 'react-hot-toast';
@@ -52,9 +54,57 @@ export default function Home() {
       setLoading(false);
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
-      toast.error('Erro ao carregar dados do contrato');
+      
+      if (error.message.includes('Contrato não configurado')) {
+        toast.error('Configure o endereço do contrato no arquivo .env.local');
+      } else {
+        toast.error('Erro ao carregar dados do contrato');
+      }
+      
       setLoading(false);
     }
+  }
+
+  // Verifica se o contrato está configurado
+  const contractAddress = getContractAddress();
+  
+  if (!contractAddress) {
+    return (
+      <Layout title="Configuração - CassoneCoin">
+        <div className="max-w-2xl mx-auto">
+          <div className="card bg-yellow-600/10 border-yellow-600/30">
+            <div className="text-center space-y-4">
+              <div className="text-6xl">⚙️</div>
+              <h2 className="text-2xl font-bold text-white">Configuração Necessária</h2>
+              <p className="text-slate-300">
+                O endereço do contrato não está configurado.
+              </p>
+              
+              <div className="bg-slate-800 p-4 rounded-lg text-left space-y-3">
+                <p className="text-slate-300 font-semibold">📝 Passos para configurar:</p>
+                <ol className="list-decimal list-inside space-y-2 text-slate-400 text-sm">
+                  <li>Execute o script: <code className="bg-slate-700 px-2 py-1 rounded">.\setup.ps1</code></li>
+                  <li>Ou crie manualmente o arquivo <code className="bg-slate-700 px-2 py-1 rounded">.env.local</code></li>
+                  <li>Adicione: <code className="bg-slate-700 px-2 py-1 rounded">NEXT_PUBLIC_CONTRACT_ADDRESS=0x...</code></li>
+                  <li>Reinicie o servidor: <code className="bg-slate-700 px-2 py-1 rounded">npm run dev</code></li>
+                </ol>
+              </div>
+              
+              <div className="pt-4">
+                <a 
+                  href="https://github.com/yourusername/cassone-coin#setup" 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-primary"
+                >
+                  📖 Ver Documentação
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
   }
 
   if (loading) {
@@ -154,7 +204,7 @@ export default function Home() {
         {/* Ações Rápidas */}
         <div className="card">
           <h2 className="text-xl font-bold text-white mb-4">⚡ Ações Rápidas</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
             <a href="/mint" className="btn btn-primary text-center">
               🪙 Mintar Tokens
             </a>
@@ -168,7 +218,13 @@ export default function Home() {
               ⚙️ Admin
             </a>
           </div>
+          <div className="flex justify-center">
+            <AddTokenButton />
+          </div>
         </div>
+
+        {/* Trocar Rede */}
+        <NetworkSwitcher />
 
         {/* Informações do Token */}
         <div className="card">

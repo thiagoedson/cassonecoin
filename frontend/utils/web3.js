@@ -1,20 +1,25 @@
 import { ethers } from 'ethers';
+import * as metamask from './metamask';
 
 let provider = null;
 let signer = null;
 
 /**
- * Conecta à carteira MetaMask
+ * Conecta à carteira MetaMask usando a API oficial
  * @returns {Promise<{provider, signer, address}>}
  */
 export async function connectWallet() {
-  if (typeof window.ethereum === 'undefined') {
-    throw new Error('MetaMask não está instalado!');
+  if (!metamask.isMetaMaskInstalled()) {
+    throw new Error('MetaMask não está instalado! Instale em https://metamask.io');
   }
 
   try {
-    // Solicita acesso às contas
-    await window.ethereum.request({ method: 'eth_requestAccounts' });
+    // Solicita acesso às contas usando a API oficial do MetaMask
+    const accounts = await metamask.requestAccounts();
+    
+    if (accounts.length === 0) {
+      throw new Error('Nenhuma conta disponível');
+    }
 
     // Cria provider e signer
     provider = new ethers.BrowserProvider(window.ethereum);
@@ -34,7 +39,7 @@ export async function connectWallet() {
  */
 export function getProvider() {
   if (!provider) {
-    if (typeof window.ethereum !== 'undefined') {
+    if (typeof window !== 'undefined' && typeof window.ethereum !== 'undefined') {
       provider = new ethers.BrowserProvider(window.ethereum);
     }
   }
@@ -56,18 +61,19 @@ export async function getSigner() {
 }
 
 /**
- * Verifica se a carteira está conectada
+ * Verifica se a carteira está conectada usando a API oficial
  * @returns {Promise<boolean>}
  */
 export async function isWalletConnected() {
-  if (typeof window.ethereum === 'undefined') {
+  if (!metamask.isMetaMaskInstalled()) {
     return false;
   }
 
   try {
-    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-    return accounts.length > 0;
-  } catch {
+    const accounts = await metamask.getAccounts();
+    return accounts.length > 0 && metamask.isProviderConnected();
+  } catch (error) {
+    // Silenciosamente ignora erros de conexão
     return false;
   }
 }

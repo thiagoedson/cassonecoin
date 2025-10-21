@@ -20,11 +20,16 @@ export default function ConnectWallet({ onConnect }) {
   }, []);
 
   async function checkConnection() {
-    const connected = await isWalletConnected();
-    if (connected) {
-      const addr = await getConnectedAddress();
-      setAddress(addr);
-      if (onConnect) onConnect(addr);
+    try {
+      const connected = await isWalletConnected();
+      if (connected) {
+        const addr = await getConnectedAddress();
+        setAddress(addr);
+        if (onConnect) onConnect(addr);
+      }
+    } catch (error) {
+      // Silenciosamente ignora erros de verificação inicial
+      console.log('MetaMask não conectado ainda');
     }
   }
 
