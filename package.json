@@ -3,8 +3,19 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "flatten": "npx hardhat flatten > flattened_CassoneCoin.sol"
+    "compile": "npx hardhat compile",
+    "test": "npx hardhat test",
+    "test:gas": "REPORT_GAS=true npx hardhat test",
+    "test:coverage": "npx hardhat coverage",
+    "node": "npx hardhat node",
+    "deploy:local": "npx hardhat ignition deploy ./ignition/modules/CassoneCoin.js --network localhost",
+    "deploy:sepolia": "npx hardhat ignition deploy ./ignition/modules/CassoneCoin.js --network sepolia",
+    "deploy:mainnet": "npx hardhat ignition deploy ./ignition/modules/CassoneCoin.js --network mainnet",
+    "verify:sepolia": "npx hardhat verify --network sepolia",
+    "verify:mainnet": "npx hardhat verify --network mainnet",
+    "flatten": "npx hardhat flatten contracts/CassoneCoin.sol > flattened_CassoneCoin.sol",
+    "clean": "npx hardhat clean",
+    "console": "npx hardhat console"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +27,7 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^5.1.0",
+    "dotenv": "^16.3.1",
     "solc": "^0.8.26"
   }
 }
