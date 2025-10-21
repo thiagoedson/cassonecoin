@@ -307,4 +307,234 @@ describe("CassoneCoin", function () {
       }
     });
   });
+
+  describe("Burning (Queima de Tokens)", function () {
+    it("Should allow users to burn their own tokens", async function () {
+      const burnAmount = ethers.parseEther("1000");
+      const initialBalance = await cassoneCoin.balanceOf(owner.address);
+      const initialSupply = await cassoneCoin.totalSupply();
+
+      await cassoneCoin.burn(burnAmount);
+
+      expect(await cassoneCoin.balanceOf(owner.address)).to.equal(initialBalance - burnAmount);
+      expect(await cassoneCoin.totalSupply()).to.equal(initialSupply - burnAmount);
+    });
+
+    it("Should emit Transfer event to zero address when burning", async function () {
+      const burnAmount = ethers.parseEther("100");
+
+      await expect(cassoneCoin.burn(burnAmount))
+        .to.emit(cassoneCoin, "Transfer")
+        .withArgs(owner.address, ethers.ZeroAddress, burnAmount);
+    });
+
+    it("Should not allow burning more tokens than balance", async function () {
+      const tooMuch = ethers.parseEther("999999999999");
+
+      await expect(cassoneCoin.connect(addr1).burn(tooMuch)).to.be.reverted;
+    });
+
+    it("Should allow burning tokens from another account with approval", async function () {
+      const amount = ethers.parseEther("100");
+      await cassoneCoin.transfer(addr1.address, amount);
+      await cassoneCoin.connect(addr1).approve(owner.address, amount);
+
+      const initialSupply = await cassoneCoin.totalSupply();
+      await cassoneCoin.burnFrom(addr1.address, amount);
+
+      expect(await cassoneCoin.balanceOf(addr1.address)).to.equal(0);
+      expect(await cassoneCoin.totalSupply()).to.equal(initialSupply - amount);
+    });
+
+    it("Should reduce total supply permanently after burning", async function () {
+      const burnAmount = ethers.parseEther("5000");
+      const supplyBefore = await cassoneCoin.totalSupply();
+
+      await cassoneCoin.burn(burnAmount);
+
+      const supplyAfter = await cassoneCoin.totalSupply();
+      expect(supplyAfter).to.equal(supplyBefore - burnAmount);
+
+      // Burning is permanent - total supply should stay reduced
+      await cassoneCoin.mint(addr1.address, burnAmount);
+      expect(await cassoneCoin.totalSupply()).to.equal(supplyBefore);
+    });
+  });
+
+  describe("Pause Functionality", function () {
+    it("Should allow owner to pause the contract", async function () {
+      await cassoneCoin.pause();
+      expect(await cassoneCoin.paused()).to.equal(true);
+    });
+
+    it("Should allow owner to unpause the contract", async function () {
+      await cassoneCoin.pause();
+      await cassoneCoin.unpause();
+      expect(await cassoneCoin.paused()).to.equal(false);
+    });
+
+    it("Should not allow non-owner to pause", async function () {
+      await expect(cassoneCoin.connect(addr1).pause())
+        .to.be.revertedWithCustomError(cassoneCoin, "OwnableUnauthorizedAccount");
+    });
+
+    it("Should not allow non-owner to unpause", async function () {
+      await cassoneCoin.pause();
+      await expect(cassoneCoin.connect(addr1).unpause())
+        .to.be.revertedWithCustomError(cassoneCoin, "OwnableUnauthorizedAccount");
+    });
+
+    it("Should prevent transfers when paused", async function () {
+      await cassoneCoin.pause();
+
+      await expect(
+        cassoneCoin.transfer(addr1.address, ethers.parseEther("100"))
+      ).to.be.revertedWithCustomError(cassoneCoin, "EnforcedPause");
+    });
+
+    it("Should prevent transferFrom when paused", async function () {
+      const amount = ethers.parseEther("100");
+      await cassoneCoin.approve(addr1.address, amount);
+      await cassoneCoin.pause();
+
+      await expect(
+        cassoneCoin.connect(addr1).transferFrom(owner.address, addr2.address, amount)
+      ).to.be.revertedWithCustomError(cassoneCoin, "EnforcedPause");
+    });
+
+    it("Should prevent minting when paused", async function () {
+      await cassoneCoin.pause();
+
+      await expect(
+        cassoneCoin.mint(addr1.address, ethers.parseEther("100"))
+      ).to.be.revertedWithCustomError(cassoneCoin, "EnforcedPause");
+    });
+
+    it("Should prevent burning when paused", async function () {
+      await cassoneCoin.pause();
+
+      await expect(
+        cassoneCoin.burn(ethers.parseEther("100"))
+      ).to.be.revertedWithCustomError(cassoneCoin, "EnforcedPause");
+    });
+
+    it("Should allow transfers after unpause", async function () {
+      await cassoneCoin.pause();
+      await cassoneCoin.unpause();
+
+      const amount = ethers.parseEther("100");
+      await expect(cassoneCoin.transfer(addr1.address, amount))
+        .to.emit(cassoneCoin, "Transfer")
+        .withArgs(owner.address, addr1.address, amount);
+    });
+
+    it("Should emit Paused event", async function () {
+      await expect(cassoneCoin.pause())
+        .to.emit(cassoneCoin, "Paused")
+        .withArgs(owner.address);
+    });
+
+    it("Should emit Unpaused event", async function () {
+      await cassoneCoin.pause();
+      await expect(cassoneCoin.unpause())
+        .to.emit(cassoneCoin, "Unpaused")
+        .withArgs(owner.address);
+    });
+  });
+
+  describe("Supply Cap", function () {
+    it("Should have correct maximum supply", async function () {
+      const maxSupply = await cassoneCoin.getMaxSupply();
+      expect(maxSupply).to.equal(ethers.parseEther("10000000")); // 10 million
+    });
+
+    it("Should not allow minting beyond cap", async function () {
+      const currentSupply = await cassoneCoin.totalSupply();
+      const cap = await cassoneCoin.cap();
+      const remainingMintable = cap - currentSupply;
+
+      // Try to mint more than remaining
+      await expect(
+        cassoneCoin.mint(addr1.address, remainingMintable + ethers.parseEther("1"))
+      ).to.be.revertedWithCustomError(cassoneCoin, "ERC20ExceededCap");
+    });
+
+    it("Should allow minting up to the cap", async function () {
+      const currentSupply = await cassoneCoin.totalSupply();
+      const cap = await cassoneCoin.cap();
+      const remainingMintable = cap - currentSupply;
+
+      await cassoneCoin.mint(addr1.address, remainingMintable);
+
+      expect(await cassoneCoin.totalSupply()).to.equal(cap);
+    });
+
+    it("Should not allow deployment with initial supply exceeding max", async function () {
+      const CassoneCoin = await ethers.getContractFactory("CassoneCoin");
+
+      await expect(
+        CassoneCoin.deploy(10_000_001) // More than 10 million
+      ).to.be.revertedWith("Initial supply exceeds maximum");
+    });
+
+    it("Should allow burning and then minting back up to cap", async function () {
+      const currentSupply = await cassoneCoin.totalSupply();
+      const cap = await cassoneCoin.cap();
+
+      // Mint to cap
+      const remainingMintable = cap - currentSupply;
+      await cassoneCoin.mint(owner.address, remainingMintable);
+
+      // Burn some tokens
+      const burnAmount = ethers.parseEther("1000");
+      await cassoneCoin.burn(burnAmount);
+
+      // Should be able to mint again
+      await cassoneCoin.mint(addr1.address, burnAmount);
+      expect(await cassoneCoin.totalSupply()).to.equal(cap);
+    });
+
+    it("Should track cap correctly", async function () {
+      expect(await cassoneCoin.cap()).to.equal(ethers.parseEther("10000000"));
+    });
+  });
+
+  describe("Combined Features", function () {
+    it("Should not allow burning when paused", async function () {
+      await cassoneCoin.pause();
+
+      await expect(
+        cassoneCoin.burn(ethers.parseEther("100"))
+      ).to.be.revertedWithCustomError(cassoneCoin, "EnforcedPause");
+    });
+
+    it("Should allow burn after unpause", async function () {
+      await cassoneCoin.pause();
+      await cassoneCoin.unpause();
+
+      const burnAmount = ethers.parseEther("100");
+      await expect(cassoneCoin.burn(burnAmount))
+        .to.emit(cassoneCoin, "Transfer");
+    });
+
+    it("Should respect cap even after burns and mints", async function () {
+      const cap = await cassoneCoin.cap();
+      const currentSupply = await cassoneCoin.totalSupply();
+
+      // Mint to almost cap
+      const almostCap = cap - currentSupply - ethers.parseEther("100");
+      await cassoneCoin.mint(owner.address, almostCap);
+
+      // Burn some
+      await cassoneCoin.burn(ethers.parseEther("50"));
+
+      // Should be able to mint exactly to cap
+      await cassoneCoin.mint(addr1.address, ethers.parseEther("50"));
+
+      // But not more
+      await expect(
+        cassoneCoin.mint(addr2.address, ethers.parseEther("1"))
+      ).to.be.revertedWithCustomError(cassoneCoin, "ERC20ExceededCap");
+    });
+  });
 });
