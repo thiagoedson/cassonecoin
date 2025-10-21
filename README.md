@@ -1,298 +1,397 @@
-# CassoneCoin
+# CassoneCoin (CASS)
 
-Uma criptomoeda moderna e eficiente construída com foco em segurança, velocidade e descentralização.
+Um token ERC20 moderno e seguro implementado em Solidity para a blockchain Ethereum.
 
 ## Sobre o Projeto
 
-CassoneCoin é uma implementação de blockchain que visa fornecer uma alternativa rápida, segura e escalável para transações digitais. O projeto foi desenvolvido com as melhores práticas de segurança e arquitetura blockchain moderna.
+CassoneCoin é um token ERC20 construído com os mais altos padrões de segurança, utilizando a biblioteca OpenZeppelin (v5.1.0). O token inclui funcionalidades básicas de transferência, aprovação e mintagem controlada pelo owner.
 
-## Características Principais
+## Características
 
-- **Descentralização**: Rede peer-to-peer totalmente distribuída
-- **Segurança**: Algoritmo de consenso robusto com criptografia de ponta
-- **Velocidade**: Confirmação rápida de transações
-- **Escalabilidade**: Arquitetura preparada para crescimento
-- **Transparência**: Todas as transações são públicas e verificáveis
-- **Open Source**: Código aberto e auditável
+- **Padrão ERC20**: Totalmente compatível com o padrão ERC20
+- **Seguro**: Baseado em OpenZeppelin Contracts (auditado e battle-tested)
+- **Mintável**: Owner pode criar novos tokens (função mint)
+- **Transferível**: Permite transferências entre endereços
+- **Ownership**: Sistema de ownership com possibilidade de transferência ou renúncia
 
 ## Especificações Técnicas
 
-### Blockchain
-- **Algoritmo de Consenso**: Proof of Work (PoW)
-- **Tempo de Bloco**: ~10 minutos
-- **Recompensa por Bloco**: 50 CASSONE (com halving a cada 210.000 blocos)
-- **Suprimento Máximo**: 21.000.000 CASSONE
-- **Dificuldade**: Ajuste automático a cada 2016 blocos
+- **Nome**: Cassone Coin
+- **Símbolo**: CASS
+- **Decimais**: 18 (padrão ERC20)
+- **Solidity**: 0.8.26
+- **Framework**: Hardhat
+- **Bibliotecas**: OpenZeppelin Contracts v5.1.0
 
-### Criptografia
-- **Hash de Bloco**: SHA-256
-- **Assinatura de Transações**: ECDSA (Elliptic Curve Digital Signature Algorithm)
-- **Endereços**: Base58Check encoding
+## Pré-requisitos
 
-## Como Usar a Moeda
-
-### Instalação
-
-#### Pré-requisitos
-```bash
-# Para compilar do código fonte, você precisará de:
+- Node.js v18+
+- npm ou yarn
 - Git
-- Compilador C++ (GCC 7+ ou Clang 5+)
-- CMake 3.10+
-- Bibliotecas: OpenSSL, Boost, libevent
-```
 
-#### Instalação a partir do código fonte
+## Instalação
+
 ```bash
 # Clone o repositório
 git clone https://github.com/thiagoedson/cassonecoin.git
 cd cassonecoin
 
-# Compile o projeto
-mkdir build && cd build
-cmake ..
-make -j$(nproc)
-
-# Instale (opcional)
-sudo make install
+# Instale as dependências
+npm install
 ```
 
-#### Instalação via binários pré-compilados
-```bash
-# Download da última versão
-wget https://github.com/thiagoedson/cassonecoin/releases/latest/download/cassonecoin-linux-x64.tar.gz
-
-# Extraia os arquivos
-tar -xzf cassonecoin-linux-x64.tar.gz
-
-# Torne executável
-chmod +x cassonecoin-*
-```
-
-### Iniciando o Node
-
-#### Modo Full Node
-```bash
-# Inicie o daemon da blockchain
-./cassonecoind
-
-# Ou com arquivo de configuração customizado
-./cassonecoind -conf=/path/to/cassonecoin.conf
-```
-
-#### Configuração Básica
-Crie um arquivo `cassonecoin.conf` em `~/.cassonecoin/`:
-
-```conf
-# Configurações de rede
-listen=1
-maxconnections=125
-
-# Configurações RPC (para usar a wallet)
-server=1
-rpcuser=seu_usuario
-rpcpassword=sua_senha_segura
-rpcport=8332
-
-# Configurações de mineração (opcional)
-gen=0  # Mude para 1 para minerar
-genproclimit=1  # Número de cores para mineração
-```
-
-### Usando a Carteira (Wallet)
-
-#### Criar uma nova carteira
-```bash
-./cassonecoin-cli createwallet "minha_carteira"
-```
-
-#### Gerar um novo endereço
-```bash
-./cassonecoin-cli getnewaddress
-```
-
-#### Verificar saldo
-```bash
-./cassonecoin-cli getbalance
-```
-
-#### Enviar CassoneCoin
-```bash
-./cassonecoin-cli sendtoaddress "endereco_destino" 10.0
-```
-
-#### Listar transações
-```bash
-./cassonecoin-cli listtransactions
-```
-
-#### Verificar informações da blockchain
-```bash
-# Ver informações do bloco atual
-./cassonecoin-cli getblockchaininfo
-
-# Ver informações da rede
-./cassonecoin-cli getnetworkinfo
-
-# Ver conexões ativas
-./cassonecoin-cli getpeerinfo
-```
-
-### Mineração
-
-#### Começar a minerar
-```bash
-# Via linha de comando
-./cassonecoin-cli setgenerate true 2  # 2 = número de threads
-
-# Parar mineração
-./cassonecoin-cli setgenerate false
-```
-
-#### Verificar status da mineração
-```bash
-./cassonecoin-cli getmininginfo
-```
-
-## API RPC
-
-CassoneCoin fornece uma API JSON-RPC completa para integração:
+## Compilação
 
 ```bash
-# Exemplo usando curl
-curl --user seu_usuario:sua_senha \
-  --data-binary '{"jsonrpc":"1.0","id":"curltest","method":"getblockcount","params":[]}' \
-  -H 'content-type: text/plain;' \
-  http://127.0.0.1:8332/
+# Compilar os contratos
+npx hardhat compile
 ```
 
-### Principais Comandos RPC
+## Testes
 
-| Comando | Descrição |
-|---------|-----------|
-| `getblockcount` | Retorna a altura atual da blockchain |
-| `getbestblockhash` | Retorna o hash do último bloco |
-| `getblock` | Retorna informações sobre um bloco específico |
-| `gettransaction` | Retorna detalhes de uma transação |
-| `sendtoaddress` | Envia moedas para um endereço |
-| `getbalance` | Retorna o saldo da carteira |
-| `listunspent` | Lista outputs não gastos (UTXOs) |
+```bash
+# Executar testes
+npx hardhat test
 
-## Desenvolvimento
+# Executar testes com coverage
+npx hardhat coverage
 
-### Estrutura do Projeto
+# Executar testes com gas reporter
+REPORT_GAS=true npx hardhat test
+```
+
+## Deploy
+
+### Deploy Local (Hardhat Network)
+
+```bash
+# Terminal 1: Iniciar node local
+npx hardhat node
+
+# Terminal 2: Deploy
+npx hardhat ignition deploy ./ignition/modules/CassoneCoin.js --network localhost
+```
+
+### Deploy em Testnet (Sepolia)
+
+1. Configure suas variáveis de ambiente em `.env`:
+```env
+PRIVATE_KEY=sua_chave_privada_aqui
+INFURA_API_KEY=sua_api_key_infura
+ETHERSCAN_API_KEY=sua_api_key_etherscan
+```
+
+2. Deploy:
+```bash
+npx hardhat ignition deploy ./ignition/modules/CassoneCoin.js --network sepolia
+```
+
+3. Verifique o contrato no Etherscan:
+```bash
+npx hardhat verify --network sepolia ENDEREÇO_DO_CONTRATO "1000000"
+```
+
+### Deploy em Mainnet
+
+```bash
+npx hardhat ignition deploy ./ignition/modules/CassoneCoin.js --network mainnet
+```
+
+**⚠️ ATENÇÃO**: Antes de fazer deploy em mainnet:
+- Faça auditoria completa de segurança
+- Teste extensivamente em testnet
+- Verifique todas as configurações
+- Tenha certeza do initial supply
+
+## Uso do Token
+
+### Interagindo via Hardhat Console
+
+```javascript
+// Conectar ao console
+npx hardhat console --network localhost
+
+// Pegar instância do contrato
+const CassoneCoin = await ethers.getContractFactory("CassoneCoin");
+const cassone = await CassoneCoin.attach("ENDEREÇO_DO_CONTRATO");
+
+// Ver balance
+const balance = await cassone.balanceOf("ENDEREÇO");
+console.log(ethers.formatEther(balance));
+
+// Transferir tokens
+await cassone.transfer("ENDEREÇO_DESTINO", ethers.parseEther("100"));
+
+// Mintar novos tokens (apenas owner)
+await cassone.mint("ENDEREÇO_DESTINO", ethers.parseEther("1000"));
+
+// Ver total supply
+const supply = await cassone.totalSupply();
+console.log(ethers.formatEther(supply));
+```
+
+### Interagindo via Script
+
+Crie um arquivo `scripts/interact.js`:
+
+```javascript
+const { ethers } = require("hardhat");
+
+async function main() {
+  const contractAddress = "ENDEREÇO_DO_CONTRATO";
+  const cassone = await ethers.getContractAt("CassoneCoin", contractAddress);
+
+  // Ver informações do token
+  const name = await cassone.name();
+  const symbol = await cassone.symbol();
+  const totalSupply = await cassone.totalSupply();
+
+  console.log("Token Name:", name);
+  console.log("Symbol:", symbol);
+  console.log("Total Supply:", ethers.formatEther(totalSupply), "CASS");
+}
+
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});
+```
+
+Execute:
+```bash
+npx hardhat run scripts/interact.js --network localhost
+```
+
+### Usando com MetaMask
+
+1. Adicione o token no MetaMask:
+   - Clique em "Importar tokens"
+   - Cole o endereço do contrato
+   - O símbolo (CASS) e decimais (18) devem aparecer automaticamente
+
+2. Agora você pode:
+   - Ver seu saldo de CASS
+   - Enviar CASS para outros endereços
+   - Receber CASS
+
+### Usando com Web3.js
+
+```javascript
+const Web3 = require('web3');
+const web3 = new Web3('https://mainnet.infura.io/v3/YOUR-PROJECT-ID');
+
+const contractAddress = 'ENDEREÇO_DO_CONTRATO';
+const abi = [...]; // ABI do contrato
+
+const cassone = new web3.eth.Contract(abi, contractAddress);
+
+// Ver balance
+const balance = await cassone.methods.balanceOf('ENDEREÇO').call();
+
+// Transferir (requer conta desbloqueada)
+await cassone.methods.transfer('DESTINO', web3.utils.toWei('10', 'ether'))
+  .send({ from: 'SEU_ENDEREÇO' });
+```
+
+### Usando com Ethers.js
+
+```javascript
+const { ethers } = require('ethers');
+
+const provider = new ethers.JsonRpcProvider('https://mainnet.infura.io/v3/YOUR-PROJECT-ID');
+const contractAddress = 'ENDEREÇO_DO_CONTRATO';
+const abi = [...]; // ABI do contrato
+
+const cassone = new ethers.Contract(contractAddress, abi, provider);
+
+// Ver balance
+const balance = await cassone.balanceOf('ENDEREÇO');
+console.log(ethers.formatEther(balance));
+
+// Transferir (requer signer)
+const wallet = new ethers.Wallet('PRIVATE_KEY', provider);
+const cassoneWithSigner = cassone.connect(wallet);
+await cassoneWithSigner.transfer('DESTINO', ethers.parseEther('10'));
+```
+
+## Funções do Contrato
+
+### Funções ERC20 Padrão
+
+| Função | Descrição | Acesso |
+|--------|-----------|--------|
+| `name()` | Retorna o nome do token | Público |
+| `symbol()` | Retorna o símbolo do token | Público |
+| `decimals()` | Retorna o número de decimais (18) | Público |
+| `totalSupply()` | Retorna o supply total | Público |
+| `balanceOf(address)` | Retorna o saldo de um endereço | Público |
+| `transfer(address, uint256)` | Transfere tokens | Público |
+| `approve(address, uint256)` | Aprova gasto de tokens | Público |
+| `allowance(address, address)` | Verifica aprovação | Público |
+| `transferFrom(address, address, uint256)` | Transfere de aprovação | Público |
+
+### Funções Específicas do CassoneCoin
+
+| Função | Descrição | Acesso |
+|--------|-----------|--------|
+| `mint(address, uint256)` | Cria novos tokens | Apenas Owner |
+| `owner()` | Retorna o endereço do owner | Público |
+| `transferOwnership(address)` | Transfere ownership | Apenas Owner |
+| `renounceOwnership()` | Renuncia ownership | Apenas Owner |
+
+## Eventos
+
+```solidity
+event Transfer(address indexed from, address indexed to, uint256 value);
+event Approval(address indexed owner, address indexed spender, uint256 value);
+event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+```
+
+## Estrutura do Projeto
+
 ```
 cassonecoin/
-├── src/               # Código fonte principal
-│   ├── blockchain/    # Implementação da blockchain
-│   ├── consensus/     # Algoritmos de consenso
-│   ├── crypto/        # Funções criptográficas
-│   ├── network/       # Camada de rede P2P
-│   ├── wallet/        # Implementação da carteira
-│   └── rpc/           # Servidor RPC
-├── tests/             # Testes unitários e de integração
-├── docs/              # Documentação adicional
-└── scripts/           # Scripts auxiliares
+├── contracts/
+│   └── CassoneCoin.sol          # Contrato principal do token
+├── test/
+│   └── Lock.js                  # Testes (a serem atualizados)
+├── ignition/modules/
+│   └── Lock.js                  # Módulo de deploy (a ser atualizado)
+├── hardhat.config.js            # Configuração do Hardhat
+├── package.json                 # Dependências do projeto
+├── flattened_CassoneCoin.sol    # Contrato flattened para verificação
+├── README.md                    # Este arquivo
+├── DEVELOPMENT_PLAN.md          # Plano de desenvolvimento inicial
+└── ADJUSTMENTS_PLAN.md          # Plano de ajustes e melhorias
 ```
 
-### Contribuindo
+## Roadmap
 
-Contribuições são bem-vindas! Por favor:
+### ✅ Versão 1.0 (Atual)
+- [x] Token ERC20 básico
+- [x] Função de mintagem
+- [x] Sistema de ownership
+- [x] Contrato deployável
 
-1. Faça fork do projeto
+### 🔄 Versão 1.1 (Em Desenvolvimento)
+- [ ] Testes completos do token
+- [ ] Módulo de deploy específico
+- [ ] Scripts de interação
+- [ ] Documentação expandida
+
+### 📋 Versão 2.0 (Planejado)
+- [ ] Cap máximo de supply
+- [ ] Função burn (queima de tokens)
+- [ ] Pause/Unpause em emergências
+- [ ] Sistema de snapshot
+- [ ] Auditoria de segurança
+
+### 💡 Versão 3.0 (Futuro)
+- [ ] Sistema de vesting
+- [ ] Staking com recompensas
+- [ ] Governança descentralizada (DAO)
+- [ ] Anti-bot/Anti-whale
+- [ ] Frontend Web3
+
+## Segurança
+
+### Práticas Implementadas
+- ✅ Usa OpenZeppelin (biblioteca auditada)
+- ✅ Solidity 0.8.26 (proteção contra overflow)
+- ✅ Modifier onlyOwner para funções críticas
+- ✅ Eventos para todas mudanças de estado importantes
+
+### Recomendações
+- 🔐 Mantenha sua private key segura
+- 🔐 Use hardware wallet para owner em produção
+- 🔐 Considere multi-sig wallet para ownership
+- 🔐 Faça auditoria antes de mainnet
+- 🔐 Teste extensivamente em testnet
+
+### Reportando Vulnerabilidades
+Se você encontrar uma vulnerabilidade de segurança:
+1. **NÃO** abra uma issue pública
+2. Envie email para: security@cassonecoin.org
+3. Aguarde nossa resposta antes de divulgar
+
+## Contribuindo
+
+Contribuições são bem-vindas! Para contribuir:
+
+1. Fork o projeto
 2. Crie uma branch para sua feature (`git checkout -b feature/MinhaFeature`)
 3. Commit suas mudanças (`git commit -m 'Adiciona MinhaFeature'`)
 4. Push para a branch (`git push origin feature/MinhaFeature`)
 5. Abra um Pull Request
 
-### Executando Testes
+### Diretrizes de Contribuição
+- Escreva testes para novas funcionalidades
+- Mantenha o código limpo e documentado
+- Siga as convenções de código do projeto
+- Atualize a documentação quando necessário
+
+## Scripts Úteis
+
 ```bash
-cd build
-make test
+# Desenvolvimento
+npm run compile          # Compilar contratos
+npm run test            # Executar testes
+npm run coverage        # Coverage dos testes
+npm run flatten         # Gerar arquivo flattened
 
-# Ou executar testes específicos
-./tests/test_blockchain
-./tests/test_wallet
+# Deploy
+npm run deploy:local    # Deploy local
+npm run deploy:sepolia  # Deploy Sepolia
+npm run deploy:mainnet  # Deploy Mainnet
+
+# Utilidades
+npm run clean           # Limpar artifacts
+npm run node            # Iniciar node local
 ```
-
-## Segurança
-
-### Boas Práticas
-
-- **Backup da Carteira**: Sempre faça backup do arquivo `wallet.dat`
-- **Senha Forte**: Use senhas fortes para RPC e criptografia da carteira
-- **Firewall**: Configure firewall para proteger a porta RPC (8332)
-- **Atualizações**: Mantenha o software sempre atualizado
-- **Cold Storage**: Para grandes quantias, considere cold wallets
-
-### Reportando Vulnerabilidades
-
-Se você encontrar uma vulnerabilidade de segurança, por favor NÃO abra uma issue pública. Envie um email para: security@cassonecoin.org
-
-## Roadmap
-
-### Versão 1.0 (Atual - Em Desenvolvimento)
-- [x] Implementação básica da blockchain
-- [x] Sistema de carteira
-- [ ] Rede P2P completa
-- [ ] Interface gráfica (GUI)
-- [ ] Documentação completa
-
-### Versão 2.0 (Futuro)
-- [ ] Lightning Network para transações instantâneas
-- [ ] Smart Contracts básicos
-- [ ] Melhorias de privacidade (transações confidenciais)
-- [ ] Mobile wallets (iOS/Android)
-- [ ] Suporte a hardware wallets
-
-### Versão 3.0 (Longo Prazo)
-- [ ] Sharding para escalabilidade
-- [ ] Cross-chain interoperability
-- [ ] Governança descentralizada
-- [ ] Zero-knowledge proofs
-
-## Recursos
-
-- **Website**: https://cassonecoin.org (em breve)
-- **Documentação**: https://docs.cassonecoin.org (em breve)
-- **Explorer**: https://explorer.cassonecoin.org (em breve)
-- **Fórum**: https://forum.cassonecoin.org (em breve)
-- **Discord**: Link em breve
-- **Twitter**: @CassoneCoin
 
 ## FAQ
 
-### Como obter CassoneCoin?
-Você pode obter CassoneCoin de três formas:
-1. Minerando (rodando um node de mineração)
-2. Comprando em exchanges (quando listado)
-3. Recebendo de outros usuários
+**Q: Qual o supply total de CassoneCoin?**
+A: O supply inicial é definido no deploy (padrão: 1.000.000 CASS). Novos tokens podem ser mintados pelo owner.
 
-### Qual a diferença entre CassoneCoin e Bitcoin?
-CassoneCoin mantém os princípios fundamentais do Bitcoin mas com otimizações modernas e foco em casos de uso específicos.
+**Q: Posso queimar (burn) tokens?**
+A: Atualmente não, mas está planejado para a versão 2.0.
 
-### É necessário baixar toda a blockchain?
-Sim, para rodar um full node. Alternativamente, você pode usar SPV (Simplified Payment Verification) wallets que são mais leves.
+**Q: O contrato foi auditado?**
+A: Usa OpenZeppelin que é auditado. Auditoria específica do projeto está planejada.
 
-### Quanto tempo leva para sincronizar?
-Depende da sua conexão de internet e hardware. Inicialmente pode levar algumas horas para sincronizar toda a blockchain.
+**Q: Em quais redes o token está disponível?**
+A: Pode ser deployado em qualquer rede compatível com EVM (Ethereum, Polygon, BSC, etc.).
+
+**Q: Como obter CASS?**
+A: Depende do objetivo do projeto. Pode ser via:
+- Distribuição inicial (airdrop)
+- Venda pública (ICO/IDO)
+- Exchanges (quando listado)
+- Liquidity pools (DEX)
+
+**Q: O ownership pode ser removido?**
+A: Sim, o owner pode renunciar ao ownership chamando `renounceOwnership()`, tornando o contrato imutável.
 
 ## Licença
 
 Este projeto está licenciado sob a MIT License - veja o arquivo [LICENSE](LICENSE) para detalhes.
 
-## Aviso Legal
+## Links Úteis
 
-CassoneCoin é um projeto experimental e educacional. Use por sua conta e risco. Cryptocurrency é volátil e pode resultar em perdas financeiras. Nunca invista mais do que você pode perder.
+- **GitHub**: https://github.com/thiagoedson/cassonecoin
+- **Issues**: https://github.com/thiagoedson/cassonecoin/issues
+- **Hardhat Docs**: https://hardhat.org/docs
+- **OpenZeppelin**: https://docs.openzeppelin.com/contracts
+- **ERC20 Spec**: https://eips.ethereum.org/EIPS/eip-20
 
 ## Contato
 
 - **Email**: contato@cassonecoin.org
-- **GitHub**: https://github.com/thiagoedson/cassonecoin
-- **Issues**: https://github.com/thiagoedson/cassonecoin/issues
+- **GitHub**: [@thiagoedson](https://github.com/thiagoedson)
 
 ---
 
-**Desenvolvido com dedicação pela comunidade CassoneCoin**
+**Desenvolvido com OpenZeppelin e Hardhat**
 
-*Este projeto é open source e mantido pela comunidade. Contribuições são sempre bem-vindas!*
+*Este é um projeto open source. Contribuições e feedback são sempre bem-vindos!*
